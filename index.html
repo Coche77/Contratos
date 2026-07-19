@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generador de Contrato — Twin Oaks Capital</title>
+<style>
+  :root{
+    --ink:#1c1c1a;
+    --ink-soft:#5a5854;
+    --paper:#fffdf9;
+    --line:#dbd6ca;
+    --accent:#8a5a34;
+    --accent-bg:#f4ece1;
+    --field-bg:#fbf8f2;
+    --ok:#3f6b45;
+    --warn:#a2452a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: Georgia, 'Times New Roman', serif;
+    background:#efece3;
+    color:var(--ink);
+  }
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+    display:grid;
+    grid-template-columns:380px 1fr;
+    gap:24px;
+  }
+  @media (max-width:900px){ .wrap{grid-template-columns:1fr;} }
+  .panel{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px 22px 26px;
+    align-self:start;
+    position:sticky;
+    top:20px;
+    max-height:calc(100vh - 40px);
+    overflow-y:auto;
+  }
+  @media (max-width:900px){ .panel{position:static; max-height:none;} }
+  .panel h1{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:.02em;
+    margin:0 0 2px;
+    color:var(--ink);
+  }
+  .panel p.sub{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:0 0 16px;
+    line-height:1.5;
+  }
+  fieldset{ border:none; padding:0; margin:0 0 18px; }
+  legend{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--accent);
+    font-weight:700;
+    padding:0 0 8px;
+  }
+  label{
+    display:block;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin:0 0 4px;
+  }
+  .field{margin-bottom:12px;}
+  input[type=text], input[type=date], input[type=number], select, textarea{
+    width:100%;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:13.5px;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:var(--field-bg);
+    color:var(--ink);
+  }
+  input:focus, textarea:focus, select:focus{
+    outline:2px solid var(--accent);
+    outline-offset:0;
+    border-color:var(--accent);
+  }
+  textarea{resize:vertical; min-height:52px; font-family: Arial, Helvetica, sans-serif;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .hint{font-size:11px; color:var(--ink-soft); font-family: Arial, Helvetica, sans-serif; margin-top:3px;}
+  .status{font-size:11px; font-family: Arial, Helvetica, sans-serif; margin-top:3px;}
+  .status.ok{color:var(--ok);}
+  .status.warn{color:var(--warn);}
+  .btnbar{ display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; }
+  button{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:12.5px;
+    font-weight:700;
+    padding:9px 12px;
+    border-radius:6px;
+    border:1px solid var(--accent);
+    background:var(--accent-bg);
+    color:var(--accent);
+    cursor:pointer;
+  }
+  button.primary{ background:var(--accent); color:#fff; }
+  button.ghost{ background:transparent; }
+  button:hover{ filter:brightness(0.97); }
+  .divider{ height:1px; background:var(--line); margin:18px 0; }
+
+  /* documento */
+  .doc{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:50px 56px;
+    line-height:1.55;
+    font-size:14px;
+  }
+  .doc h2{ text-align:center; font-size:16px; letter-spacing:.03em; margin:0 0 4px; }
+  .doc .subtitle{ text-align:center; font-size:12px; color:var(--ink-soft); margin-bottom:22px; font-family: Arial, sans-serif;}
+  .doc table.datos{ width:100%; border-collapse:collapse; margin-bottom:26px; font-size:12.5px; }
+  .doc table.datos td{ border:1px solid var(--line); padding:6px 10px; vertical-align:top; }
+  .doc table.datos td.k{ background:var(--accent-bg); font-family: Arial, sans-serif; font-weight:700; width:200px; color:var(--accent); }
+  .doc p{ text-align:justify; margin:0 0 12px; }
+  .doc .clausula-titulo{ font-weight:700; margin-top:18px; }
+  .firma-wrap{ display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-top:60px; }
+  .firma{ text-align:center; }
+  .firma .linea{ border-top:1px solid var(--ink); margin-bottom:6px; padding-top:40px; }
+  .firma .rol{ font-family: Arial, sans-serif; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--accent); }
+  @page{
+    size: letter;
+    margin: 0.75in;
+  }
+  @media print{
+    html, body{
+      background:#fff;
+      width:auto;
+      margin:0;
+      padding:0;
+    }
+    .panel{ display:none !important; }
+    .wrap{
+      display:block !important;
+      max-width:none;
+      width:auto;
+      margin:0;
+      padding:0;
+      grid-template-columns:none;
+    }
+    .doc{
+      border:none;
+      border-radius:0;
+      padding:0;
+      width:auto;
+      max-width:none;
+      box-shadow:none;
+      font-size:12.5pt;
+    }
+    .doc table.datos{ width:100% !important; table-layout:fixed; }
+    .doc table.datos td.k{ width:170px; }
+    .firma-wrap{ page-break-inside:avoid; }
+    p, .doc table.datos tr{ page-break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="panel">
+    <h1>Generador de Contrato</h1>
+    <p class="sub">Twin Oaks Capital de México — Prestación de servicios de adecuaciones. Llena los datos del contratista y de la obra; el documento a la derecha se arma solo.</p>
+
+    <fieldset>
+      <legend>Contratista</legend>
+      <div class="field">
+        <label for="selContratista">Seleccionar de la lista</label>
+        <select id="selContratista">
+          <option value="">— Nuevo / escribir manualmente —</option>
+        </select>
+        <div class="status" id="estadoCarga">Cargando contratistas desde GitHub…</div>
+      </div>
+      <div class="field">
+        <label for="nombre">Nombre completo</label>
+        <input type="text" id="nombre" value="Juan Antonio Reséndiz Olvera" placeholder="Nombre del contratista">
+      </div>
+      <div class="field">
+        <label for="rfc">RFC</label>
+        <input type="text" id="rfc" value="REOJ930507VE3" placeholder="RFC">
+      </div>
+      <div class="field">
+        <label for="domicilio">Domicilio legal</label>
+        <textarea id="domicilio" placeholder="Calle, colonia, ciudad, N.L.">Calle Faisán Elliot 2020, Colonia Los Faisanes, Sec. El Dorado, Guadalupe, N.L.</textarea>
+      </div>
+      <div class="btnbar">
+        <button type="button" class="ghost" id="btnGuardarContratista">Guardar en la lista</button>
+      </div>
+      <div class="hint">"Guardar en la lista" solo lo agrega a esta sesión del navegador. Para que quede permanente, usa "Exportar contratistas.json" al final y sube el archivo a tu repo.</div>
+    </fieldset>
+
+    <div class="divider"></div>
+
+    <fieldset>
+      <legend>Obra / servicios</legend>
+      <div class="field">
+        <label for="ubicacion">Ubicación de la obra</label>
+        <textarea id="ubicacion">Monte Rosa 113, Col. Villa Montaña, San Pedro Garza García, N.L.</textarea>
+      </div>
+      <div class="field">
+        <label for="tipoproyecto">Tipo de proyecto / trabajo a realizar</label>
+        <textarea id="tipoproyecto">Suministro y aplicación de acabado tipo yeso en muros.</textarea>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Plazo</legend>
+      <div class="row2">
+        <div class="field">
+          <label for="fechainicio">Fecha de inicio</label>
+          <input type="date" id="fechainicio" value="2026-04-27">
+        </div>
+        <div class="field">
+          <label for="meses">Duración (meses)</label>
+          <input type="number" id="meses" value="3" min="0" step="0.5">
+        </div>
+      </div>
+      <div class="hint">La fecha de término se calcula sumando los meses a la fecha de inicio.</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Importe</legend>
+      <div class="field">
+        <label for="importe">Contraprestación total (MXN, más IVA)</label>
+        <input type="number" id="importe" value="705070.27" step="0.01" min="0">
+      </div>
+      <div class="field">
+        <label for="anticipo">Anticipo</label>
+        <input type="number" id="anticipo" value="75000" step="0.01" min="0">
+      </div>
+      <div class="field">
+        <label for="fondogarantia">Fondo de garantía (%)</label>
+        <input type="number" id="fondogarantia" value="5" step="0.5" min="0">
+      </div>
+      <div class="field">
+        <label for="mesesgarantia">Vigencia de garantía tras entrega (meses)</label>
+        <input type="number" id="mesesgarantia" value="6" step="1" min="0">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Firma</legend>
+      <div class="field">
+        <label for="lugarfirma">Lugar de firma</label>
+        <input type="text" id="lugarfirma" value="San Pedro Garza García, N.L.">
+      </div>
+      <div class="field">
+        <label for="fechafirma">Fecha de firma</label>
+        <input type="date" id="fechafirma" value="2026-04-26">
+      </div>
+    </fieldset>
+
+    <div class="divider"></div>
+
+    <div class="btnbar">
+      <button type="button" class="primary" id="btnImprimir">Imprimir / Guardar PDF</button>
+      <button type="button" class="ghost" id="btnExportar">Exportar contratistas.json</button>
+    </div>
+    <div class="hint">Después de exportar, sube el archivo a <b>github.com/Coche77/Contratos</b> (raíz del repo, nombre <code>contratistas.json</code>) para que quede disponible la próxima vez que abras la app.</div>
+  </div>
+
+  <div class="doc" id="doc">
+    <h2>CONTRATO DE PRESTACIÓN DE SERVICIOS DE ADECUACIONES</h2>
+    <div class="subtitle">Twin Oaks Capital de México, S.A. de C.V. — Contratista</div>
+
+    <table class="datos">
+      <tr><td class="k">Cliente</td><td>Twin Oaks Capital de México, S.A. de C.V. — RFC TOC101026QW8</td></tr>
+      <tr><td class="k">Contratista</td><td id="s-nombre-mayus">—</td></tr>
+      <tr><td class="k">RFC Contratista</td><td id="s-rfc">—</td></tr>
+      <tr><td class="k">Descripción de servicios</td><td>Trabajos de acabados en la residencial ubicada en <span id="s-ubicacion">—</span></td></tr>
+      <tr><td class="k">Tipo de proyecto</td><td id="s-tipoproyecto">—</td></tr>
+      <tr><td class="k">Plazo de ejecución</td><td>Inicio: <span id="s-fechainicio-l">—</span>. Terminación: <span id="s-fechatermino-l">—</span> (<span id="s-meses">—</span>)</td></tr>
+      <tr><td class="k">Contraprestación</td><td id="s-importe-letra">—</td></tr>
+      <tr><td class="k">Forma de pago</td><td>Anticipo de <span id="s-anticipo-letra">—</span> y estimaciones semanales.</td></tr>
+    </table>
+
+    <p>CONTRATO DE PRESTACIÓN DE SERVICIOS PROFESIONALES (EL "CONTRATO") QUE CELEBRAN POR UNA PARTE TWIN OAKS CAPITAL DE MEXICO, S.A. DE C.V. REPRESENTADO EN ESTE ACTO POR SU APODERADO JOSE LUIS RAMIREZ PALAU A QUIEN EN LO SUCESIVO SE LE DENOMINARA COMO "EL CLIENTE" Y POR LA OTRA PARTE, <span id="s-nombre-mayus2">—</span>, A QUIEN EN LO SUCESIVO SE LE DENOMINARA COMO "EL CONTRATISTA", DE CONFORMIDAD CON LAS SIGUIENTES DECLARACIONES Y CLAUSULAS:</p>
+
+    <p class="clausula-titulo">DECLARACIONES</p>
+    <p><b>I.- Declara EL CLIENTE a través de su Apoderado:</b><br>
+    1. Es una sociedad legalmente constituida según consta en la Escritura Pública 4040 con fecha de 26 de agosto de 2010 ante la fe del Lic. Daniel Eduardo Flores Elizondo Notario Público número 89 en la ciudad de Monterrey, N.L.<br>
+    2. Su Apoderado cuenta con las facultades suficientes para celebrar el presente contrato, mismas que no han sido revocadas.<br>
+    3. Pretende llevar a cabo la adecuación de la residencia ubicada en <span id="s-ubicacion2">—</span>.</p>
+
+    <p><b>II.- Declara EL CONTRATISTA:</b><br>
+    1. Es una Persona Física Con Actividad Empresarial con RFC <span id="s-rfc2">—</span>.<br>
+    2. Cuenta con los elementos técnicos, humanos y materiales necesarios para la prestación de los Servicios.<br>
+    3. Su domicilio legal se ubica en <span id="s-domicilio">—</span>.</p>
+
+    <p class="clausula-titulo">CLÁUSULAS</p>
+
+    <p class="clausula-titulo">PRIMERA.- OBJETO DEL CONTRATO</p>
+    <p>El Cliente contrata a EL CONTRATISTA para el <span id="s-tipoproyecto2">—</span>, conforme a los alcances descritos en la Propuesta Técnica – Económica adjunta como Anexo I.</p>
+
+    <p class="clausula-titulo">SEGUNDA.- HONORARIOS Y ANTICIPO</p>
+    <p>Las Partes acuerdan que EL CONTRATISTA recibirá un monto de <span id="s-importe-letra2">—</span> más IVA. Se otorgará un anticipo de <span id="s-anticipo-letra2">—</span>. El resto se pagará mediante estimaciones semanales de avance, previa amortización del anticipo y la retención del fondo de garantía.</p>
+
+    <p class="clausula-titulo">TERCERA.- FONDO DE GARANTÍA</p>
+    <p>EL CLIENTE retendrá el <span id="s-fondogarantia">5</span>% (<span id="s-fondogarantia-letra">cinco por ciento</span>) de cada estimación semanal para constituir un Fondo de Garantía. Dicha suma será devuelta a EL CONTRATISTA <span id="s-mesesgarantia">6</span> (<span id="s-mesesgarantia-letra">seis</span>) meses después de la entrega-recepción de la obra, siempre que no aparezcan desperfectos o vicios ocultos.</p>
+
+    <p class="clausula-titulo">CUARTA.- TRABAJOS EXTRAORDINARIOS</p>
+    <p>Cualquier trabajo no comprendido originalmente requiere un presupuesto adicional por escrito y la firma de un Adéndum. Si las partes no acuerdan el costo, EL CLIENTE podrá contratar a un tercero para dichos trabajos.</p>
+
+    <p class="clausula-titulo">QUINTA.- PLAZO DE EJECUCIÓN</p>
+    <p>El plazo total es de <span id="s-meses2">—</span>, iniciando el <span id="s-fechainicio-l2">—</span> y terminando el <span id="s-fechatermino-l2">—</span>, de acuerdo con el Programa de Obra (Anexo II).</p>
+
+    <p class="clausula-titulo">SEXTA.- RESPONSABILIDAD Y GARANTÍA</p>
+    <p>EL CONTRATISTA es responsable de los daños a terceros o a EL CLIENTE durante la obra. La garantía por desperfectos estará vigente por <span id="s-mesesgarantia2">6</span> meses tras la entrega, respaldada por el fondo mencionado en la Cláusula Tercera.</p>
+
+    <p class="clausula-titulo">SÉPTIMA.- RESCISIÓN</p>
+    <p>EL CLIENTE podrá rescindir el contrato si EL CONTRATISTA no inicia en la fecha pactada, suspende injustificadamente los trabajos o incumple con sus obligaciones laborales.</p>
+
+    <p class="clausula-titulo">OCTAVA.- LEY APLICABLE Y JURISDICCIÓN</p>
+    <p>Para cualquier controversia, las partes se someten a la jurisdicción de los Tribunales competentes en el Primer Distrito Judicial del Estado de Nuevo León, en la Ciudad de Monterrey.</p>
+
+    <p>Se firma el presente contrato por duplicado en <span id="s-lugarfirma">—</span>, el <span id="s-fechafirma-l">—</span>.</p>
+
+    <div class="firma-wrap">
+      <div class="firma">
+        <div class="linea"></div>
+        <div class="rol">EL CLIENTE</div>
+        Jose Luis Ramirez Palau<br>Twin Oaks Capital de Mexico, S.A. de C.V.
+      </div>
+      <div class="firma">
+        <div class="linea"></div>
+        <div class="rol">EL CONTRATISTA</div>
+        <span id="s-nombre-firma">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const GITHUB_RAW_CANDIDATES = [
+  'https://raw.githubusercontent.com/Coche77/Contratos/main/contratistas.json',
+  'https://raw.githubusercontent.com/Coche77/Contratos/master/contratistas.json'
+];
+
+let contratistas = [];
+
+async function cargarContratistas(){
+  const estado = document.getElementById('estadoCarga');
+  for(const url of GITHUB_RAW_CANDIDATES){
+    try{
+      const resp = await fetch(url, {cache:'no-store'});
+      if(!resp.ok) continue;
+      const data = await resp.json();
+      if(Array.isArray(data.contratistas)){
+        contratistas = data.contratistas;
+        estado.textContent = `${contratistas.length} contratista(s) cargado(s) desde GitHub.`;
+        estado.className = 'status ok';
+        poblarSelect();
+        sincronizarSelectConRFC();
+        return;
+      }
+    }catch(e){ /* intenta el siguiente candidato */ }
+  }
+  estado.textContent = 'No se pudo leer contratistas.json del repo (¿aún no existe, o el repo es privado?). Puedes escribir los datos manualmente y exportar el JSON al final.';
+  estado.className = 'status warn';
+}
+
+function poblarSelect(){
+  const sel = document.getElementById('selContratista');
+  sel.innerHTML = '<option value="">— Nuevo / escribir manualmente —</option>';
+  contratistas.forEach((c, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = `${c.nombre} (${c.rfc})`;
+    sel.appendChild(opt);
+  });
+}
+
+function sincronizarSelectConRFC(){
+  const rfcActual = document.getElementById('rfc').value.trim();
+  const idx = contratistas.findIndex(c => c.rfc === rfcActual);
+  if(idx >= 0){ document.getElementById('selContratista').value = idx; }
+}
+
+document.getElementById('selContratista').addEventListener('change', (e) => {
+  const i = e.target.value;
+  if(i === '') return;
+  const c = contratistas[i];
+  document.getElementById('nombre').value = c.nombre;
+  document.getElementById('rfc').value = c.rfc;
+  document.getElementById('domicilio').value = c.domicilio || '';
+  actualizar();
+});
+
+document.getElementById('btnGuardarContratista').addEventListener('click', () => {
+  const nombre = document.getElementById('nombre').value.trim();
+  const rfc = document.getElementById('rfc').value.trim();
+  const domicilio = document.getElementById('domicilio').value.trim();
+  if(!nombre || !rfc){
+    alert('Escribe al menos nombre y RFC antes de guardar.');
+    return;
+  }
+  const idx = contratistas.findIndex(c => c.rfc === rfc);
+  const registro = { id: rfc, nombre, rfc, domicilio };
+  if(idx >= 0){ contratistas[idx] = registro; } else { contratistas.push(registro); }
+  poblarSelect();
+  document.getElementById('selContratista').value = contratistas.findIndex(c => c.rfc === rfc);
+  const estado = document.getElementById('estadoCarga');
+  estado.textContent = 'Agregado en esta sesión. No olvides exportar y subir el JSON a GitHub para que quede guardado.';
+  estado.className = 'status warn';
+});
+
+document.getElementById('btnExportar').addEventListener('click', () => {
+  const payload = { contratistas };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'contratistas.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// --- Lógica de generación del contrato (igual que antes) ---
+
+const UNIDADES = ["","uno","dos","tres","cuatro","cinco","seis","siete","ocho","nueve","diez",
+  "once","doce","trece","catorce","quince","dieciséis","diecisiete","dieciocho","diecinueve","veinte"];
+const DECENAS = ["","","veinte","treinta","cuarenta","cincuenta","sesenta","setenta","ochenta","noventa"];
+const CENTENAS = ["","ciento","doscientos","trescientos","cuatrocientos","quinientos","seiscientos","setecientos","ochocientos","novecientos"];
+
+function trescientosEnLetras(n){
+  if(n === 100) return "cien";
+  let out = "";
+  const c = Math.floor(n/100), r = n%100;
+  if(c>0) out += CENTENAS[c] + " ";
+  if(r>0){
+    if(r<=20){ out += UNIDADES[r]; }
+    else{
+      const d = Math.floor(r/10), u = r%10;
+      out += DECENAS[d] + (u>0 ? " y " + UNIDADES[u] : "");
+    }
+  }
+  return out.trim();
+}
+
+function enteroEnLetras(n){
+  if(n === 0) return "cero";
+  let partes = [];
+  const millones = Math.floor(n/1000000); n %= 1000000;
+  const miles = Math.floor(n/1000); n %= 1000;
+  const cientos = n;
+  if(millones>0) partes.push(millones===1 ? "un millón" : trescientosEnLetras(millones)+" millones");
+  if(miles>0) partes.push(miles===1 ? "mil" : trescientosEnLetras(miles)+" mil");
+  if(cientos>0) partes.push(trescientosEnLetras(cientos));
+  return partes.join(" ").trim();
+}
+
+function pesosEnLetras(monto){
+  const entero = Math.floor(monto);
+  const centavos = Math.round((monto - entero) * 100);
+  const letras = enteroEnLetras(entero);
+  const cap = letras.charAt(0).toUpperCase() + letras.slice(1);
+  const pesoLabel = entero === 1 ? "peso" : "pesos";
+  return `$${entero.toLocaleString('es-MX')} (${cap} ${pesoLabel} ${String(centavos).padStart(2,'0')}/100 M.N.)`;
+}
+
+const NUM_LETRA = {0:"cero",1:"uno",2:"dos",3:"tres",4:"cuatro",5:"cinco",6:"seis",7:"siete",8:"ocho",9:"nueve",10:"diez",11:"once",12:"doce"};
+
+function sumarMeses(fechaISO, meses){
+  if(!fechaISO) return null;
+  const [y,m,d] = fechaISO.split('-').map(Number);
+  const base = new Date(y, m-1, d);
+  const enteros = Math.floor(meses);
+  const fraccion = meses - enteros;
+  base.setMonth(base.getMonth() + enteros);
+  if(fraccion > 0){ base.setDate(base.getDate() + Math.round(fraccion*30)); }
+  return base;
+}
+
+const MESES_NOMBRE = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+
+function fechaLargaDate(date){
+  if(!date) return "";
+  return `${date.getDate()} de ${MESES_NOMBRE[date.getMonth()]} de ${date.getFullYear()}`;
+}
+
+function fechaLarga(fechaISO){
+  if(!fechaISO) return "";
+  const [y,m,d] = fechaISO.split('-').map(Number);
+  return fechaLargaDate(new Date(y, m-1, d));
+}
+
+function actualizar(){
+  const nombre = document.getElementById('nombre').value.trim();
+  const rfc = document.getElementById('rfc').value.trim();
+  const domicilio = document.getElementById('domicilio').value.trim();
+  const ubicacion = document.getElementById('ubicacion').value.trim();
+  const tipoproyecto = document.getElementById('tipoproyecto').value.trim();
+  const fechainicio = document.getElementById('fechainicio').value;
+  const meses = parseFloat(document.getElementById('meses').value) || 0;
+  const importe = parseFloat(document.getElementById('importe').value) || 0;
+  const anticipo = parseFloat(document.getElementById('anticipo').value) || 0;
+  const fondogarantia = parseFloat(document.getElementById('fondogarantia').value) || 0;
+  const mesesgarantia = parseFloat(document.getElementById('mesesgarantia').value) || 0;
+  const lugarfirma = document.getElementById('lugarfirma').value.trim();
+  const fechafirma = document.getElementById('fechafirma').value;
+
+  const fechaTerminoDate = sumarMeses(fechainicio, meses);
+  const fechaTerminoLarga = fechaTerminoDate ? fechaLargaDate(fechaTerminoDate) : "";
+  const mesesTxt = (Number.isInteger(meses) ? meses : meses) + (meses === 1 ? " mes" : " meses");
+
+  const importeLetra = pesosEnLetras(importe);
+  const anticipoLetra = pesosEnLetras(anticipo);
+  const fechaInicioLarga = fechaLarga(fechainicio);
+  const fechaFirmaLarga = fechaLarga(fechafirma);
+
+  const map = {
+    's-nombre-mayus': nombre.toUpperCase() || '—',
+    's-nombre-mayus2': nombre.toUpperCase() || '—',
+    's-rfc': rfc || '—',
+    's-rfc2': rfc || '—',
+    's-ubicacion': ubicacion || '—',
+    's-ubicacion2': ubicacion || '—',
+    's-tipoproyecto': tipoproyecto.replace(/\.$/,'') || '—',
+    's-tipoproyecto2': tipoproyecto ? (tipoproyecto.charAt(0).toLowerCase() + tipoproyecto.slice(1).replace(/\.$/,'')) : '—',
+    's-domicilio': domicilio || '—',
+    's-fechainicio-l': fechaInicioLarga || '—',
+    's-fechainicio-l2': fechaInicioLarga || '—',
+    's-fechatermino-l': fechaTerminoLarga || '—',
+    's-fechatermino-l2': fechaTerminoLarga || '—',
+    's-meses': mesesTxt,
+    's-meses2': mesesTxt,
+    's-importe-letra': importeLetra,
+    's-importe-letra2': importeLetra,
+    's-anticipo-letra': anticipoLetra,
+    's-anticipo-letra2': anticipoLetra,
+    's-fondogarantia': fondogarantia,
+    's-fondogarantia-letra': NUM_LETRA[fondogarantia] ? NUM_LETRA[fondogarantia] + ' por ciento' : fondogarantia + '%',
+    's-mesesgarantia': mesesgarantia,
+    's-mesesgarantia2': mesesgarantia,
+    's-mesesgarantia-letra': NUM_LETRA[mesesgarantia] || mesesgarantia,
+    's-lugarfirma': lugarfirma || '—',
+    's-fechafirma-l': fechaFirmaLarga || '—',
+    's-nombre-firma': nombre || '—',
+  };
+  for(const id in map){
+    const el = document.getElementById(id);
+    if(el) el.textContent = map[id];
+  }
+}
+
+document.getElementById('btnImprimir').addEventListener('click', () => {
+  const nombre = document.getElementById('nombre').value.trim();
+  const rfc = document.getElementById('rfc').value.trim();
+  if(!nombre || !rfc){
+    alert('Falta el nombre o el RFC del contratista. Selecciónalo de la lista o escríbelo antes de generar el PDF.');
+    return;
+  }
+  window.print();
+});
+
+document.querySelectorAll('input, textarea').forEach(el => el.addEventListener('input', actualizar));
+cargarContratistas();
+actualizar();
+</script>
+</body>
+</html>
